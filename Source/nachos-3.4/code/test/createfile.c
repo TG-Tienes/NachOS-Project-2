@@ -2,11 +2,11 @@
 
 int main()
 {
-    char *fileName = NULL;
+    char *fileName;
     int createFile = 1;
 
     PrintString("Enter file name: ");
-    fileName = ReadString();
+    ReadString(fileName);
     
     createFile = Create(fileName);
     if(createFile == 0){
