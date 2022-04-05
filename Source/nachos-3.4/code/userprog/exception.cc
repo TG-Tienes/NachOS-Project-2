@@ -396,23 +396,20 @@ void Exception_syscall_PrintString(){
 // Project 2
 void Exception_syscall_Create(){
     int virAddr = machine->ReadRegister(4);
-    const int limit = 128;
-    int readBytes;
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result;
     char *buffer = NULL;
     SynchConsole ioCons;
-    bool result;
+    bool createSucc;
 
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
-    readBytes = ioCons.Read(buffer, limit);
-    
-    int i = 0;
-    while (buffer[i] != '\0') {
-        i++;
-    }
-    // System2User(virAddr, i, buffer);
-    result = fs.Create(buffer, 128);
 
+    // Tao file rong (initial size = 0)
+    createSucc = fs.Create(buffer, 0);
+
+    createSucc == 1 ? result = 0 : result = -1;
+    machine->WriteRegister(2, result);
 }
 
 int System2User(int virtAddr,int len,char* buffer){
