@@ -70,6 +70,10 @@ void ReadString(char* str);
 void PrintString(char buffer[]);
 
 int RandomNum();
+
+// project 2
+int Create(char *name);
+
 //
 void Halt();		
  
