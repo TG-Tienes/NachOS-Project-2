@@ -149,6 +149,11 @@ ExceptionHandler(ExceptionType which)
                     increaseProgramCounter();
                     break;
                 }
+                case SC_Create:{
+                    Exception_syscall_Create();
+                    increaseProgramCounter();
+                    break;
+                }
             }
             break;
         }
