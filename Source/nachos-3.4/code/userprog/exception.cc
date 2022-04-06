@@ -29,7 +29,7 @@
 #include "synch.h"
 #include "filesys.h"
 
-FileSystem fs;
+FileSystem fs(0);
 
 //----------------------------------------------------------------------
 // ExceptionHandler
