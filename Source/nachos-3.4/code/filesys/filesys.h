@@ -92,6 +92,14 @@ class FileSystem {
 					// file names, represented as a file
 };
 
+class OpenFileID{
+public:
+	int _type;
+	char *_fileName = NULL;
+
+	OpenFileID(char *fileName, int type);
+};
+
 #endif // FILESYS
 
 #endif // FS_H

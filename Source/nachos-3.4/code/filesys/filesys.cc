@@ -339,3 +339,14 @@ FileSystem::Print()
     delete freeMap;
     delete directory;
 } 
+
+OpenFileID::OpenFileID(char *fileName, int type){
+    int count = 0;
+    _fileName = fileName;
+    _type = type;
+    
+    FileSystem *fs = new FileSystem(0);
+    OpenFile *op =  fs->Open(_fileName);
+
+    delete fs;
+}

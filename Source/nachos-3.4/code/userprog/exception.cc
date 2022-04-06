@@ -30,6 +30,7 @@
 #include "filesys.h"
 
 FileSystem fs(0);
+OpenFileID id(10);
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -379,6 +380,7 @@ void Exception_syscall_ReadString(){
     }
     int result = System2User(virAddr, i, buffer);
     machine->WriteRegister(2, result);
+
 }
 
 // Quest 3.9 - PrintString
