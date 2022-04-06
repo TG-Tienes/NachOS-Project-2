@@ -130,9 +130,9 @@ FileSystem::FileSystem(bool format)
 	    directory->Print();
 
         delete freeMap; 
-	delete directory; 
-	delete mapHdr; 
-	delete dirHdr;
+        delete directory; 
+        delete mapHdr; 
+        delete dirHdr;
 	}
     } else {
     // if we are not formatting the disk, just open the files representing
@@ -235,7 +235,7 @@ FileSystem::Open(char *name)
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0) 		
-	openFile = new OpenFile(sector);	// name was found in directory 
+	    openFile = new OpenFile(sector);	// name was found in directory 
     delete directory;
     return openFile;				// return NULL if not found
 }
@@ -339,3 +339,9 @@ FileSystem::Print()
     delete freeMap;
     delete directory;
 } 
+
+OpenFileID::OpenFileID(char *name, int type){
+    _fileName = name, _type = type;
+    FileSystem fs = new FileSystem(0);
+    OpenFile *op = fs.Open(_fileName);
+}
