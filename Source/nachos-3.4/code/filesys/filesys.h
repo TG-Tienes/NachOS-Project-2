@@ -37,6 +37,7 @@
 
 #include "copyright.h"
 #include "openfile.h"
+#include "directory.h"
 
 #define MAX_NUM_OF_FILE 10
 
@@ -94,19 +95,22 @@ class FileSystem {
 					// file names, represented as a file
 };
 
-class OpenFileTable{
-public:
-	OpenFile **table = new OpenFile*[MAX_NUM_OF_FILE];
 
-	OpenFileTable(){
-		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-			table[i] = NULL;
-	}
-
-	int isInTable(char *name);
-};
 
 #endif // FILESYS
 
+class OpenFileTable{
+public:
+	OpenFile **table;
+
+	OpenFileTable(){
+		table = new OpenFile*[MAX_NUM_OF_FILE];
+
+    	for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+        	table[i] = NULL;
+	}
+
+	int isInTable(char *fileName);
+};
 
 #endif // FS_H

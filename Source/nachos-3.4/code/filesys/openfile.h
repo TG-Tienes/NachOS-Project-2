@@ -52,7 +52,7 @@ class OpenFile {
 		}
 
     int Length() { Lseek(file, 0, 2); return Tell(file); }
-    
+	int getSector(){return file;}
   private:
     int file;
     int currentOffset;
@@ -85,13 +85,10 @@ class OpenFile {
 					// file (this interface is simpler 
 					// than the UNIX idiom -- lseek to 
 					// end of file, tell, lseek back 
-	// check chuoi truyen vao co phai ten file hay khong
-    bool isFile(char *checkingName);
-	
+	int getSector(){return _sector;}
   private:
-	char *_fileName;
     FileHeader *hdr;			// Header for this file 
-    int seekPosition;			// Current position within the file
+    int seekPosition, _sector;			// Current position within the file
 };
 
 #endif // FILESYS

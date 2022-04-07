@@ -29,6 +29,7 @@
 
 OpenFile::OpenFile(int sector)
 { 
+    _sector = sector;
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
     seekPosition = 0;
@@ -194,9 +195,4 @@ int
 OpenFile::Length() 
 { 
     return hdr->FileLength(); 
-}
-
-bool
-OpenFile::isFile(char *checkingName){
-    return checkingName == _fileName ? 1 : 0;
 }

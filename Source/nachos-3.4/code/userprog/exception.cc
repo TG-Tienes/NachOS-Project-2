@@ -31,7 +31,6 @@
 
 FileSystem fs(0);
 OpenFileTable opTable;
-
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program

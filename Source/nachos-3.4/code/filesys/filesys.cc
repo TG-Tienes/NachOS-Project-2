@@ -340,12 +340,15 @@ FileSystem::Print()
     delete directory;
 } 
 
-// Kiem tra file co nam trong Open Table khong ?
-// return type: Vi tri neu co - Khong thi -1
-int
-OpenFileTable::isInTable(char *fileName){
+int OpenFileTable::isInTable(char *fileName){
+    Directory *dir = new Directory(NumDirEntries);
+    int res = -1;
+
     for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-        if(table[i]->isFile(fileName) == 1)
-            return i;
-    return -1;
+        if(table[i]->getSector() == dir->Find(fileName)){
+            res = i;
+            break;
+        }
+    delete dir;
+    return res;
 }
