@@ -158,6 +158,11 @@ ExceptionHandler(ExceptionType which)
                     increaseProgramCounter();
                     break;
                 }
+                case SC_Remove:{
+                    Exception_syscall_Remove();
+                    increaseProgramCounter();
+                    break;
+                }
             }
             break;
         }
