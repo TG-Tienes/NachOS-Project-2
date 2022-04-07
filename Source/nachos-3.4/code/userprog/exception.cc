@@ -144,6 +144,11 @@ ExceptionHandler(ExceptionType which)
                     increaseProgramCounter();
                     break;
                 }
+                case SC_Read:{
+                    Exception_syscall_Read();
+                    increaseProgramCounter();
+                    break;
+                }
             }
             break;
         }
