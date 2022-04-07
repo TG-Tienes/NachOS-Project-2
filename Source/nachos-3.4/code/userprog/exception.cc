@@ -409,18 +409,32 @@ void Exception_syscall_Create(){
     int virAddr = machine->ReadRegister(4), result;
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     char *buffer = NULL;
-    bool createSucc;
+    bool createSuccess;
 
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
 
-    if(buffer == NULL || strlen(buffer) == 0)
-        createSucc = 0;
+    if(buffer == NULL || strlen(buffer) == 0){
+        createSuccess = 0;
+        
+        DEBUG('a', "\n!!! File's name can't be NULL or empty !!!\n");
+    }
     else
-        createSucc = fs.Create(buffer, 0); // Tao file rong (initial size = 0)
-    createSucc == 1 ? result = 0 : result = -1;
+        createSuccess = fs.Create(buffer, 0); // Tao file rong (initial size = 0)
+
+    if(createSuccess == 1){
+        result = 0;
+
+        DEBUG('a', "\n!!! CREATE FILE SUCCESSFUL !!!\n");
+    }
+    else{
+        result = -1;
+
+        DEBUG('a', "\n!!! CREATE FILE UNSUCCESSFUL !!!\n");
+    }
     machine->WriteRegister(2, result);
     
+    delete []buffer;
     return;
 }
 
@@ -429,25 +443,44 @@ void Exception_syscall_Remove(){
     int virAddr = machine->ReadRegister(4), result;
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     char *buffer = NULL;
-    bool removeSucc;
+    bool removeSuccess;
     
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
 
     // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
     if(buffer == NULL || strlen(buffer) == 0)
-        removeSucc = 0;
+        removeSuccess = 0;
     else{
         int index = opTable.isInTable(buffer); // neu file dang mo --> lay OpenFileID
-        if(index != -1){
-            // close file
-            printf("\nPLEASE CLOSE FILE\n");
+
+        // truong hop la stdin, stdout
+        if(index == 0 || index == 1){ 
+            DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
+            return;
         }
-        removeSucc = fs.Remove(buffer); // Tao file rong (initial size = 0)
+        else if(index != -1){
+            // close file
+            DEBUG('a', "\nCLOSING FILE\n");
+        }
+
+        removeSuccess = fs.Remove(buffer); // goi ham remove trong fileSys
     }
-    removeSucc == 1 ? result = 0 : result = -1;
+
+    // remove file thanh cong
+    if(removeSuccess == 1){
+        result = 0;
+
+        DEBUG('a', "\n!!! REMOVE FILE SUCCESSFUL !!!\n");
+    }
+    else{ // remove file khong thanh cong
+        result = -1;
+
+        DEBUG('a', "\n!!! REMOVE FILE UNSUCCESSFUL !!!\n");
+    }
     machine->WriteRegister(2, result);
     
+    delete []buffer;
     return;
 }
 
