@@ -40,6 +40,8 @@
 #define SC_PrintString 20
 #define SC_RanNum 21
 
+#define SC_ReadFile 34
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
