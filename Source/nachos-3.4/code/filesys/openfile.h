@@ -85,8 +85,11 @@ class OpenFile {
 					// file (this interface is simpler 
 					// than the UNIX idiom -- lseek to 
 					// end of file, tell, lseek back 
-    
+	// check chuoi truyen vao co phai ten file hay khong
+    bool isFile(char *checkingName);
+	
   private:
+	char *_fileName;
     FileHeader *hdr;			// Header for this file 
     int seekPosition;			// Current position within the file
 };

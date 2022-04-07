@@ -195,3 +195,8 @@ OpenFile::Length()
 { 
     return hdr->FileLength(); 
 }
+
+bool
+OpenFile::isFile(char *checkingName){
+    return checkingName == _fileName ? 1 : 0;
+}
