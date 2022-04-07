@@ -339,9 +339,3 @@ FileSystem::Print()
     delete freeMap;
     delete directory;
 } 
-
-OpenFileID::OpenFileID(char *name, int type){
-    _fileName = name, _type = type;
-    FileSystem fs = new FileSystem(0);
-    OpenFile *op = fs.Open(_fileName);
-}

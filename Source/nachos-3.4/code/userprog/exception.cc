@@ -27,8 +27,9 @@
 
 #include "synchcons.h"
 #include "synch.h"
+#include "filesys.h"
 
-
+FileSystem fs(0);
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -83,6 +84,10 @@ void Exception_syscall_PrintString();
 
 // Quest 3.7 - RandomNum
 void Exception_syscall_randIntNum();
+
+
+// Project 2
+void Exception_syscall_Create();
 
 /* EXCEPTION HANDLER */
 void
@@ -141,6 +146,11 @@ ExceptionHandler(ExceptionType which)
                 }
                 case SC_PrintString:{
                     Exception_syscall_PrintString();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Create:{
+                    Exception_syscall_Create();
                     increaseProgramCounter();
                     break;
                 }
@@ -369,6 +379,7 @@ void Exception_syscall_ReadString(){
     }
     int result = System2User(virAddr, i, buffer);
     machine->WriteRegister(2, result);
+
 }
 
 // Quest 3.9 - PrintString
@@ -378,13 +389,34 @@ void Exception_syscall_PrintString(){
     int readBytes;
     char *buffer = NULL;
     SynchConsole ioCons;
-
+    
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
     
     // Xuat chuoi ra console = ham Write trong lop SynchConsole
     for(int i = 0; buffer[i] != '\0'; ++i)
         ioCons.Write(&buffer[i], 1);
+    return;
+}
+
+// Project 2
+void Exception_syscall_Create(){
+    int virAddr = machine->ReadRegister(4), result;
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    char *buffer = NULL;
+    SynchConsole ioCons;
+    bool createSucc;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    if(buffer == NULL || strlen(buffer) == 0)
+        createSucc = 0;
+    else
+        createSucc = fs.Create(buffer, 0); // Tao file rong (initial size = 0)
+    createSucc == 1 ? result = 0 : result = -1;
+    machine->WriteRegister(2, result);
+    
     return;
 }
 

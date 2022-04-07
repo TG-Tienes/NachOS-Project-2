@@ -38,6 +38,8 @@
 #include "copyright.h"
 #include "openfile.h"
 
+#define MAX_NUM_OF_FILE 10
+
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -92,14 +94,17 @@ class FileSystem {
 					// file names, represented as a file
 };
 
-class OpenFileID{
+class OpenFileTable{
 public:
-	char *_fileName;
-	int _type;
+	OpenFile **table = new OpenFile*[MAX_NUM_OF_FILE];
 
-	OpenFileID(char *name, int type);
+	OpenFileTable(){
+		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+			table[i] = NULL;
+	}
 };
 
-
 #endif // FILESYS
+
+
 #endif // FS_H
