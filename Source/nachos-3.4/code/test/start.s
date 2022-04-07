@@ -41,6 +41,18 @@ __start:
  * 	convention on the MIPS.
  * -------------------------------------------------------------
  */
+
+
+/*Project 2*/
+/* Remove */
+	.globl Remove
+	.ent Remove
+Remove:
+	addiu $2,$0,SC_Remove
+	syscall
+	j $31
+	.end Remove
+
 /*Quest 3*/
 /*Read Num*/
 	.globl ReadNum

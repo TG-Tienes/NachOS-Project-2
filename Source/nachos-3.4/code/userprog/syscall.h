@@ -30,6 +30,7 @@
 #define SC_Fork		9
 #define SC_Yield	10
 
+#define SC_Remove   11
 #define SC_Sub      43
 
 #define SC_ReadNum  15
@@ -53,6 +54,8 @@
  */
 
 /* Stop Nachos, and print out performance stats */
+
+int Remove(char *name);
 
 int Sub(int a, int b);
 

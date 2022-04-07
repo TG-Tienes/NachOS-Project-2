@@ -30,6 +30,7 @@
 #include "filesys.h"
 
 FileSystem fs(0);
+OpenFileTable opTable;
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -62,6 +63,9 @@ char* User2System(int virtAddr,int limit);
 
 // Increase PC
 void increaseProgramCounter();
+
+// Project 2
+void Exception_syscall_Remove();
 
 // Syscalls Quest 3.3 -> 3.9
 // Quest 3.3 - ReadNum
@@ -400,11 +404,11 @@ void Exception_syscall_PrintString(){
 }
 
 // Project 2
+// create
 void Exception_syscall_Create(){
     int virAddr = machine->ReadRegister(4), result;
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     char *buffer = NULL;
-    SynchConsole ioCons;
     bool createSucc;
 
     // lay buffer (chuoi) tu vung nho cua nguoi dung
@@ -415,6 +419,33 @@ void Exception_syscall_Create(){
     else
         createSucc = fs.Create(buffer, 0); // Tao file rong (initial size = 0)
     createSucc == 1 ? result = 0 : result = -1;
+    machine->WriteRegister(2, result);
+    
+    return;
+}
+
+// Remove
+void Exception_syscall_Remove(){
+    int virAddr = machine->ReadRegister(4), result;
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    char *buffer = NULL;
+    bool removeSucc;
+    
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
+    if(buffer == NULL || strlen(buffer) == 0)
+        removeSucc = 0;
+    else{
+        int index = opTable.isInTable(buffer); // neu file dang mo --> lay OpenFileID
+        if(index != -1){
+            // close file
+            printf("\nPLEASE CLOSE FILE\n");
+        }
+        removeSucc = fs.Remove(buffer); // Tao file rong (initial size = 0)
+    }
+    removeSucc == 1 ? result = 0 : result = -1;
     machine->WriteRegister(2, result);
     
     return;

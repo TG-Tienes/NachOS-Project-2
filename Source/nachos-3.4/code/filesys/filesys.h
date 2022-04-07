@@ -102,6 +102,8 @@ public:
 		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
 			table[i] = NULL;
 	}
+
+	int isInTable(char *name);
 };
 
 #endif // FILESYS
