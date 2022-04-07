@@ -114,8 +114,8 @@ ReadPrintChar: ReadPrintChar.o start.o
 	$(LD) $(LDFLAGS) start.o ReadPrintChar.o -o ReadPrintChar.coff
 	../bin/coff2noff ReadPrintChar.coff ReadPrintChar
 
-ReadFile.o: ReadFile.c
-	$(CC) $(CFLAGS) -c ReadFile.c
-ReadFile: ReadFile.o start.o
-	$(LD) $(LDFLAGS) start.o ReadFile.o -o ReadFile.coff
-	../bin/coff2noff ReadFile.coffReadFile
+# ReadFile.o: ReadFile.c
+# 	$(CC) $(CFLAGS) -c ReadFile.c
+# ReadFile: ReadFile.o start.o
+# 	$(LD) $(LDFLAGS) start.o ReadFile.o -o ReadFile.coff
+# 	../bin/coff2noff ReadFile.coffReadFile
