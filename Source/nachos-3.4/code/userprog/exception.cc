@@ -30,7 +30,7 @@
 #include "filesys.h"
 
 FileSystem fs(0);
-
+OpenFileTable oft;
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -88,7 +88,12 @@ void Exception_syscall_randIntNum();
 
 // Project 2
 void Exception_syscall_Create();
+//open file
+void Exception_syscall_OpenFile();
 
+void Exception_syscall_ReadFile();
+
+void Exception_syscall_CloseFile();
 /* EXCEPTION HANDLER */
 void
 ExceptionHandler(ExceptionType which)
@@ -151,6 +156,21 @@ ExceptionHandler(ExceptionType which)
                 }
                 case SC_Create:{
                     Exception_syscall_Create();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Open:{
+                    Exception_syscall_OpenFile();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Read:{
+                    Exception_syscall_ReadFile();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Close:{
+                    Exception_syscall_CloseFile();
                     increaseProgramCounter();
                     break;
                 }
@@ -417,6 +437,68 @@ void Exception_syscall_Create(){
     machine->WriteRegister(2, result);
 }
 
+// open file function
+void Exception_syscall_OpenFile()
+{
+    OpenFile *id;
+
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result = 10;
+    char *buffer = NULL;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    // tien hanh doc file
+    id = fs.Open(buffer);
+
+    if (id == NULL) 
+        result = -1;
+    else 
+        for (int i = 2; i < MAX_NUM_OF_FILE; ++i)
+            if (oft.table[i].File == NULL) {
+                result = i;
+                oft.table[i].File = id;
+                oft.table[i].fileName = buffer;
+                break;
+            }
+
+    machine->WriteRegister(2, result);
+}
+
+//close file function
+void Exception_syscall_CloseFile()
+{
+
+    int virAddr = machine->ReadRegister(4);
+    int id = machine->ReadRegister(5);
+    int readBytes, result = 1;
+
+    // tien hanh dong file
+    Close(id);
+    machine->WriteRegister(2, id);
+}
+
+void Exception_syscall_ReadFile()
+{
+    OpenFile *id;
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result;
+    char *buffer = NULL;
+    SynchConsole ioCons;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+   // tien hanh doc file
+    result = id->Read(buffer, 245);
+
+    machine->WriteRegister(2, result); 
+}
+
+
 int System2User(int virtAddr,int len,char* buffer){
     if (len < 0) 
         return -1;
@@ -459,3 +541,5 @@ char* User2System(int virtAddr,int limit){
 
     return kernelBuf;
 }
+
+
