@@ -340,15 +340,21 @@ FileSystem::Print()
     delete directory;
 } 
 
-int OpenFileTable::isInTable(char *fileName){
-    Directory *dir = new Directory(NumDirEntries);
-    int res = -1;
+// int FileSystem::getSector(char *fileName){
+//     Directory *dir = new Directory(NumDirEntries);
+//     int res = dir->Find(fileName);
 
-    for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-        if(table[i]->getSector() == dir->Find(fileName)){
-            res = i;
-            break;
-        }
+//     delete dir;
+//     return res;
+// }
+
+int
+OpenFileTable::temp(char *fileName){
+    // FileSystem fs(0);
+    // return fs.FindSector(file);
+    Directory *dir = new Directory(10);
+    int res = dir->Find(fileName);
+
     delete dir;
     return res;
 }

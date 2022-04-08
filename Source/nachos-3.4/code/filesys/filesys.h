@@ -38,8 +38,26 @@
 #include "copyright.h"
 #include "openfile.h"
 #include "directory.h"
+#include "copyright.h"
+
+#include "disk.h"
+#include "bitmap.h"
+#include "filehdr.h"
 
 #define MAX_NUM_OF_FILE 10
+
+class OpenFileTable{
+public:
+	OpenFile **table;
+
+	OpenFileTable(){
+		table = new OpenFile*[MAX_NUM_OF_FILE];
+
+    	for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+        	table[i] = NULL;
+	}
+	int temp(char *fileName);
+};
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
@@ -49,22 +67,24 @@ class FileSystem {
     FileSystem(bool format) {}
 
     bool Create(char *name, int initialSize) { 
-	int fileDescriptor = OpenForWrite(name);
+		int fileDescriptor = OpenForWrite(name);
 
-	if (fileDescriptor == -1) return FALSE;
-	Close(fileDescriptor); 
-	return TRUE; 
+		if (fileDescriptor == -1) 
+			return FALSE;
+		Close(fileDescriptor); 
+		return TRUE; 
 	}
 
     OpenFile* Open(char *name) {
-	  int fileDescriptor = OpenForReadWrite(name, FALSE);
+		int fileDescriptor = OpenForReadWrite(name, FALSE);
 
-	  if (fileDescriptor == -1) return NULL;
-	  return new OpenFile(fileDescriptor);
-      }
+		if (fileDescriptor == -1) 
+			return NULL;
+		return new OpenFile(fileDescriptor);
+	}
 
     bool Remove(char *name) { return Unlink(name) == 0; }
-
+	// int FindSector(char *name){}
 };
 
 #else // FILESYS
@@ -88,29 +108,15 @@ class FileSystem {
 
     void Print();			// List all the files and their contents
 
+	// int FindSector(char *name){return this->getSector(name);}
+
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file
    OpenFile* directoryFile;		// "Root" directory -- list of 
 					// file names, represented as a file
+	// int getSector(char *name);
 };
-
-
 
 #endif // FILESYS
-
-class OpenFileTable{
-public:
-	OpenFile **table;
-
-	OpenFileTable(){
-		table = new OpenFile*[MAX_NUM_OF_FILE];
-
-    	for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-        	table[i] = NULL;
-	}
-
-	int isInTable(char *fileName);
-};
-
 #endif // FS_H

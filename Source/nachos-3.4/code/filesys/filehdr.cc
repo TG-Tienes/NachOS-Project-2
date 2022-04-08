@@ -26,6 +26,7 @@
 
 #include "system.h"
 #include "filehdr.h"
+#include "synchdisk.h"
 
 //----------------------------------------------------------------------
 // FileHeader::Allocate

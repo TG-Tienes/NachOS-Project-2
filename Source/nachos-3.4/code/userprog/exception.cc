@@ -28,7 +28,12 @@
 #include "synchcons.h"
 #include "synch.h"
 #include "filesys.h"
+#include "directory.h"
 
+#include "utility.h"
+#include "filehdr.h"
+
+#define NumDirEntries 10
 FileSystem fs(0);
 OpenFileTable opTable;
 //----------------------------------------------------------------------
@@ -456,18 +461,24 @@ void Exception_syscall_Remove(){
     if(buffer == NULL || strlen(buffer) == 0)
         removeSuccess = 0;
     else{
-        int index = opTable.isInTable(buffer); // neu file dang mo --> lay OpenFileID
+        int index = -1, sec = opTable.temp(buffer);
+        for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+            if(opTable.table[i]->getSector() == sec){
+                index = i;
+                break;
+            }
+        // Directory dir(10);
+        // int index = dir.Find(buffer);
 
         // truong hop la stdin, stdout
         if(index == 0 || index == 1){ 
             DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
             return;
         }
-        else if(index != -1){
+        else if(index > 1){
             // close file
             DEBUG('a', "\nCLOSING FILE\n");
         }
-
         removeSuccess = fs.Remove(buffer); // goi ham remove trong fileSys
     }
 
