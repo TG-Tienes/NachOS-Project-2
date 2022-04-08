@@ -51,6 +51,15 @@ Remove:
 	j $31
 	.end Remove
 
+/* Seek */
+	.globl Seek
+	.ent Seek
+Seek:
+	addiu $2,$0,SC_Seek
+	syscall
+	j $31
+	.end Seek
+
 /*Quest 3*/
 /*Read num*/
 	.globl ReadNum

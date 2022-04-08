@@ -31,6 +31,7 @@
 #define SC_Yield	10
 
 #define SC_Remove   11
+#define SC_Seek     12
 #define SC_Sub      43
 
 #define SC_ReadNum  15
@@ -56,6 +57,7 @@
 /* Stop Nachos, and print out performance stats */
 
 int Remove(char *name);
+
 
 int Sub(int a, int b);
 
@@ -120,6 +122,8 @@ typedef int OpenFileId;
  
 /* Create a Nachos file, with "name" */
 int Create(char *name);
+
+int Seek(int position, OpenFileId id);
 
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.

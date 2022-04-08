@@ -25,6 +25,7 @@
 #include "system.h"
 #include "syscall.h"
 
+#include "openfile.h"
 #include "synchcons.h"
 #include "synch.h"
 #include "filesys.h"
@@ -64,9 +65,6 @@ char* User2System(int virtAddr,int limit);
 // Increase PC
 void increaseProgramCounter();
 
-// Project 2
-void Exception_syscall_Remove();
-
 // Syscalls Quest 3.3 -> 3.9
 // Quest 3.3 - ReadNum
 void Exception_sysCall_ReadNum();
@@ -89,15 +87,20 @@ void Exception_syscall_PrintString();
 // Quest 3.7 - RandomNum
 void Exception_syscall_randIntNum();
 
-
 // Project 2
+void Exception_syscall_Remove();
+
 void Exception_syscall_Create();
+
+void Exception_syscall_Seek();
+
 //open file
 void Exception_syscall_OpenFile();
 
 void Exception_syscall_ReadFile();
 
 void Exception_syscall_CloseFile();
+
 /* EXCEPTION HANDLER */
 void
 ExceptionHandler(ExceptionType which)
@@ -180,6 +183,11 @@ ExceptionHandler(ExceptionType which)
                 }
                 case SC_Close:{
                     Exception_syscall_CloseFile();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Seek:{
+                    Exception_syscall_Seek();
                     increaseProgramCounter();
                     break;
                 }
@@ -473,23 +481,25 @@ void Exception_syscall_Remove(){
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
 
-    // // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
-    // if(buffer == NULL || strlen(buffer) == 0)
-    //     removeSuccess = 0;
-    // else{
-    //     int index = oft.fileIndex(buffer);
+    // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
+    if(buffer == NULL || strlen(buffer) == 0)
+        removeSuccess = 0;
+    else{
+        int index = oft.fileIndex(buffer);
         
-    //     // truong hop la stdin, stdout
-    //     if(index == 0 || index == 1){ 
-    //         DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
-    //         return;
-    //     }
-    //     else if(index > 1){
-    //         // close file
-    //         DEBUG('a', "\nCLOSING FILE\n");
-    //     }
+        // truong hop la stdin, stdout
+        if(index == 0 || index == 1){ 
+            DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
+            return;
+        }
+        else if(index > 1){
+            // close file
+            DEBUG('a', "\nCLOSING FILE\n");
+
+            Close(index);
+        }
         removeSuccess = fs.Remove(buffer); // goi ham remove trong fileSys
-    // }
+    }
 
     // remove file thanh cong
     if(removeSuccess == 1){
@@ -505,6 +515,36 @@ void Exception_syscall_Remove(){
     machine->WriteRegister(2, result);
     
     delete []buffer;
+    return;
+}
+
+// Seek
+void Exception_syscall_Seek(){
+    int pos = machine->ReadRegister(4), result = -1, length = 0;
+    int id = machine->ReadRegister(5);
+
+    length = oft.table[id].File->Length();
+    if(id < 0 || id >= MAX_NUM_OF_FILE){
+        DEBUG('a', "OpenFileID exceeded file limit");
+    }
+    else if(id == 0 || id == 1){
+        DEBUG('a', "\nCan't Seek stdin and stdout\n");
+    }
+    else if(oft.isOpen(id) != 1){
+        DEBUG('a', "\nFile is not opened\n");
+    }
+    else if(pos < -1 || pos > length){
+        DEBUG('a', "\nSeek position exceeded the limit of this file\n");
+    }
+    else{
+        if(pos == -1)
+            pos = length;
+        oft.table[id].File->Seek(pos);
+        result = pos;
+    }
+
+    machine->WriteRegister(2, result);
+
     return;
 }
 
@@ -544,7 +584,7 @@ void Exception_syscall_CloseFile()
 
     int virAddr = machine->ReadRegister(4);
     int id = machine->ReadRegister(5);
-    int readBytes, result = 1;
+    int result = 1;
 
     // tien hanh dong file
     Close(id);

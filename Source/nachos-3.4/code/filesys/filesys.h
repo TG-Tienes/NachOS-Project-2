@@ -72,7 +72,6 @@ class FileSystem {
 	}
 
     bool Remove(char *name) { return Unlink(name) == 0; }
-	// int FindSector(char *name){}
 };
 
 #else // FILESYS
@@ -101,7 +100,6 @@ class FileSystem {
 					// represented as a file
    OpenFile* directoryFile;		// "Root" directory -- list of 
 					// file names, represented as a file
-	// int getSector(char *name);
 };
 
 
@@ -123,6 +121,11 @@ public:
 		table = new FileInfor[MAX_NUM_OF_FILE];
 		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
 			table[i].File = NULL;
+	}
+	bool isOpen(int id){
+		if(table[id].File == NULL)
+			return 0;
+		return 1;
 	}
 
 	int fileIndex(char *name){

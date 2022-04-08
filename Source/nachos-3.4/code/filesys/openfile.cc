@@ -29,7 +29,6 @@
 
 OpenFile::OpenFile(int sector)
 { 
-    _sector = sector;
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
     seekPosition = 0;
