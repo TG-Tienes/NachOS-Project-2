@@ -347,14 +347,3 @@ FileSystem::Print()
 //     delete dir;
 //     return res;
 // }
-
-int
-OpenFileTable::temp(char *fileName){
-    // FileSystem fs(0);
-    // return fs.FindSector(file);
-    Directory *dir = new Directory(10);
-    int res = dir->Find(fileName);
-
-    delete dir;
-    return res;
-}

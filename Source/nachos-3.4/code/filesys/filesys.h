@@ -46,19 +46,7 @@
 
 #define MAX_NUM_OF_FILE 10
 
-class OpenFileTable{
-public:
-	OpenFile **table;
-
-	OpenFileTable(){
-		table = new OpenFile*[MAX_NUM_OF_FILE];
-
-    	for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-        	table[i] = NULL;
-	}
-	int temp(char *fileName);
-};
-
+#define MAX_NUM_OF_FILE 10
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -108,8 +96,6 @@ class FileSystem {
 
     void Print();			// List all the files and their contents
 
-	// int FindSector(char *name){return this->getSector(name);}
-
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file
@@ -118,5 +104,33 @@ class FileSystem {
 	// int getSector(char *name);
 };
 
+
+
 #endif // FILESYS
+
+struct FileInfor 
+{
+	OpenFile* File;
+	char* fileName;
+};
+
+class OpenFileTable{
+public:
+	FileInfor *table;
+public:
+
+	OpenFileTable(){
+		table = new FileInfor[MAX_NUM_OF_FILE];
+		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+			table[i].File = NULL;
+	}
+
+	int fileIndex(char *name){
+		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+			if(table[i].fileName == name)
+				return i;
+		return -1;
+	}
+};
+
 #endif // FS_H

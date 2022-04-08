@@ -30,12 +30,8 @@
 #include "filesys.h"
 #include "directory.h"
 
-#include "utility.h"
-#include "filehdr.h"
-
-#define NumDirEntries 10
 FileSystem fs(0);
-OpenFileTable opTable;
+OpenFileTable oft;
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -96,7 +92,12 @@ void Exception_syscall_randIntNum();
 
 // Project 2
 void Exception_syscall_Create();
+//open file
+void Exception_syscall_OpenFile();
 
+void Exception_syscall_ReadFile();
+
+void Exception_syscall_CloseFile();
 /* EXCEPTION HANDLER */
 void
 ExceptionHandler(ExceptionType which)
@@ -164,6 +165,21 @@ ExceptionHandler(ExceptionType which)
                 }
                 case SC_Remove:{
                     Exception_syscall_Remove();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Open:{
+                    Exception_syscall_OpenFile();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Read:{
+                    Exception_syscall_ReadFile();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Close:{
+                    Exception_syscall_CloseFile();
                     increaseProgramCounter();
                     break;
                 }
@@ -457,30 +473,23 @@ void Exception_syscall_Remove(){
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
 
-    // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
-    if(buffer == NULL || strlen(buffer) == 0)
-        removeSuccess = 0;
-    else{
-        int index = -1, sec = opTable.temp(buffer);
-        for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-            if(opTable.table[i]->getSector() == sec){
-                index = i;
-                break;
-            }
-        // Directory dir(10);
-        // int index = dir.Find(buffer);
-
-        // truong hop la stdin, stdout
-        if(index == 0 || index == 1){ 
-            DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
-            return;
-        }
-        else if(index > 1){
-            // close file
-            DEBUG('a', "\nCLOSING FILE\n");
-        }
+    // // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
+    // if(buffer == NULL || strlen(buffer) == 0)
+    //     removeSuccess = 0;
+    // else{
+    //     int index = oft.fileIndex(buffer);
+        
+    //     // truong hop la stdin, stdout
+    //     if(index == 0 || index == 1){ 
+    //         DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
+    //         return;
+    //     }
+    //     else if(index > 1){
+    //         // close file
+    //         DEBUG('a', "\nCLOSING FILE\n");
+    //     }
         removeSuccess = fs.Remove(buffer); // goi ham remove trong fileSys
-    }
+    // }
 
     // remove file thanh cong
     if(removeSuccess == 1){
@@ -498,6 +507,68 @@ void Exception_syscall_Remove(){
     delete []buffer;
     return;
 }
+
+// open file function
+void Exception_syscall_OpenFile()
+{
+    OpenFile *id;
+
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result = 10;
+    char *buffer = NULL;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    // tien hanh doc file
+    id = fs.Open(buffer);
+
+    if (id == NULL) 
+        result = -1;
+    else 
+        for (int i = 2; i < MAX_NUM_OF_FILE; ++i)
+            if (oft.table[i].File == NULL) {
+                result = i;
+                oft.table[i].File = id;
+                oft.table[i].fileName = buffer;
+                break;
+            }
+
+    machine->WriteRegister(2, result);
+}
+
+//close file function
+void Exception_syscall_CloseFile()
+{
+
+    int virAddr = machine->ReadRegister(4);
+    int id = machine->ReadRegister(5);
+    int readBytes, result = 1;
+
+    // tien hanh dong file
+    Close(id);
+    machine->WriteRegister(2, id);
+}
+
+void Exception_syscall_ReadFile()
+{
+    OpenFile *id;
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result;
+    char *buffer = NULL;
+    SynchConsole ioCons;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+   // tien hanh doc file
+    result = id->Read(buffer, 245);
+
+    machine->WriteRegister(2, result); 
+}
+
 
 int System2User(int virtAddr,int len,char* buffer){
     if (len < 0) 
@@ -541,3 +612,5 @@ char* User2System(int virtAddr,int limit){
 
     return kernelBuf;
 }
+
+

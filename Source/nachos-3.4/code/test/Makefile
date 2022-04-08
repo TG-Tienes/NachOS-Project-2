@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort sub ReadPrintNum ReadPrintChar PrintASCII help ReadPrintString sortArray randomNum createfile
+all: halt shell matmult sort sub ReadPrintNum ReadPrintChar PrintASCII help ReadPrintString sortArray randomNum createfile openFile readFile
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -119,3 +119,15 @@ createfile.o: createfile.c
 createfile: createfile.o start.o
 	$(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
 	../bin/coff2noff createfile.coff createfile
+
+openFile.o: openFile.c
+	$(CC) $(CFLAGS) -c openFile.c
+openFile: openFile.o start.o
+	$(LD) $(LDFLAGS) start.o openFile.o -o openFile.coff
+	../bin/coff2noff openFile.coff openFile
+
+readFile.o: readFile.c
+	$(CC) $(CFLAGS) -c readFile.c
+readFile: readFile.o start.o
+	$(LD) $(LDFLAGS) start.o readFile.o -o readFile.coff
+	../bin/coff2noff readFile.coff readFile
