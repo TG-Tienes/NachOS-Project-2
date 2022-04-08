@@ -38,6 +38,7 @@
 #include "copyright.h"
 #include "openfile.h"
 
+#define MAX_NUM_OF_FILE 10
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -85,6 +86,7 @@ class FileSystem {
 
     void Print();			// List all the files and their contents
 
+
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file
@@ -92,6 +94,26 @@ class FileSystem {
 					// file names, represented as a file
 };
 
+
+
 #endif // FILESYS
+
+struct FileInfor 
+{
+	OpenFile* File;
+	char* fileName;
+};
+
+class OpenFileTable{
+public:
+	FileInfor *table;
+public:
+
+	OpenFileTable(){
+		table = new FileInfor[MAX_NUM_OF_FILE];
+		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
+			table[i].File = NULL;
+	}
+};
 
 #endif // FS_H
