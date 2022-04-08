@@ -145,7 +145,7 @@ ExceptionHandler(ExceptionType which)
                     break;
                 }
                 case SC_ReadFile:{
-                    Exception_syscall_Read();
+                    Exception_syscall_ReadFile();
                     increaseProgramCounter();
                     break;
                 }
@@ -394,7 +394,7 @@ void Exception_syscall_PrintString(){
 }
 
 // Project 2
-void Exception_syscall_Read() {
+void Exception_syscall_ReadFile_example() {
     // Input: buffer(char*), so ky tu(int), id cua file(OpenFileID)
     // Output: -1: Loi, So byte read thuc su: Thanh cong, -2: Thanh cong
     // Cong dung: Doc file voi tham so la buffer, so ky tu cho phep va id cua file
@@ -405,7 +405,7 @@ void Exception_syscall_Read() {
     int NewPos;
     char *buf;
     // Kiem tra id cua file truyen vao co nam ngoai bang mo ta file khong
-    if (id < 0 || id > 14)
+    if (id < 0 || id > 10)
     {
         printf("\nKhong the read vi id nam ngoai bang mo ta file.");
         machine->WriteRegister(2, -1);
@@ -457,6 +457,16 @@ void Exception_syscall_Read() {
     }
     delete buf;
     return;
+}
+
+void Exception_syscall_ReadFile(){
+    OpenFile *id;
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128;
+    int readBytes;
+    char *buffer = NULL;
+    SynchConsole ioCons;
+
 }
 
 int System2User(int virtAddr,int len,char* buffer){
