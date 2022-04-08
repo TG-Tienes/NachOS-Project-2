@@ -14,7 +14,7 @@ int main()
         PrintString(fileName);
     }
     else
-        Read(fileName, 256, id);
+        PrintString("Se read or write file o day ");
     
     Close(id);
 
