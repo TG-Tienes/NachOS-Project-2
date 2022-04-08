@@ -27,8 +27,9 @@
 
 #include "synchcons.h"
 #include "synch.h"
+#include "filesys.h"
 
-
+FileSystem fs(0);
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -83,6 +84,10 @@ void Exception_syscall_PrintString();
 
 // Quest 3.7 - RandomNum
 void Exception_syscall_randIntNum();
+
+
+// Project 2
+void Exception_syscall_Create();
 
 /* EXCEPTION HANDLER */
 void
@@ -141,6 +146,11 @@ ExceptionHandler(ExceptionType which)
                 }
                 case SC_PrintString:{
                     Exception_syscall_PrintString();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_Create:{
+                    Exception_syscall_Create();
                     increaseProgramCounter();
                     break;
                 }
@@ -386,6 +396,25 @@ void Exception_syscall_PrintString(){
     for(int i = 0; buffer[i] != '\0'; ++i)
         ioCons.Write(&buffer[i], 1);
     return;
+}
+
+// Project 2
+void Exception_syscall_Create(){
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result;
+    char *buffer = NULL;
+    SynchConsole ioCons;
+    bool createSucc;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    // Tao file rong (initial size = 0)
+    createSucc = fs.Create(buffer, 0);
+
+    createSucc == 1 ? result = 0 : result = -1;
+    machine->WriteRegister(2, result);
 }
 
 int System2User(int virtAddr,int len,char* buffer){
