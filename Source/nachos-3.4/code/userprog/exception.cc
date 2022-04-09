@@ -31,7 +31,6 @@
 #include "filesys.h"
 #include "directory.h"
 
-FileSystem fs(0);
 OpenFileTable oft;
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -453,7 +452,7 @@ void Exception_syscall_Create(){
         DEBUG('a', "\n!!! File's name can't be NULL or empty !!!\n");
     }
     else
-        createSuccess = fs.Create(buffer, 0); // Tao file rong (initial size = 0)
+        createSuccess = fileSystem->Create(buffer, 0); // Tao file rong (initial size = 0)
 
     if(createSuccess == 1){
         result = 0;
@@ -498,7 +497,7 @@ void Exception_syscall_Remove(){
 
             Close(index);
         }
-        removeSuccess = fs.Remove(buffer); // goi ham remove trong fileSys
+        removeSuccess = fileSystem->Remove(buffer); // goi ham remove trong fileSys
     }
 
     // remove file thanh cong
@@ -562,7 +561,7 @@ void Exception_syscall_OpenFile()
     buffer = User2System(virAddr, limit);
 
     // tien hanh doc file
-    id = fs.Open(buffer);
+    id = fileSystem->Open(buffer);
 
     if (id == NULL) 
         result = -1;
