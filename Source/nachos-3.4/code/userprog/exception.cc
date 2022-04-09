@@ -149,6 +149,11 @@ ExceptionHandler(ExceptionType which)
                     increaseProgramCounter();
                     break;
                 }
+                case SC_WriteFile:{
+                    Exception_syscall_ReadFile();
+                    increaseProgramCounter();
+                    break;
+                }
             }
             break;
         }
@@ -427,6 +432,7 @@ void Exception_syscall_WriteFile()
     PrintString("Nhap string ban muon write vao file: ");
     ReadString(buffer);
 
+    // tien hanh ghi file
     result = id->Write(buffer, 245);
 
     machine->WriteRegister(2, result); 

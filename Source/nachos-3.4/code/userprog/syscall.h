@@ -41,7 +41,7 @@
 #define SC_RanNum 21
 
 #define SC_ReadFile 34
-#define SC_WriteFile 43
+#define SC_WriteFile 35
 
 #ifndef IN_ASM
 
