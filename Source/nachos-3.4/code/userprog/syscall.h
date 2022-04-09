@@ -41,6 +41,7 @@
 #define SC_RanNum 21
 
 #define SC_ReadFile 34
+#define SC_WriteFile 43
 
 #ifndef IN_ASM
 
@@ -125,7 +126,7 @@ void Create(char *name);
 OpenFileId Open(char *name);
 
 /* Write "size" bytes from "buffer" to the open file. */
-void Write(char *buffer, int size, OpenFileId id);
+int Write(char *buffer, int size, OpenFileId id);
 
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't

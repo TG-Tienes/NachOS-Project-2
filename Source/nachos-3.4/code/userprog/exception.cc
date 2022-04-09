@@ -394,15 +394,44 @@ void Exception_syscall_PrintString(){
 }
 
 // Project 2
-void Exception_syscall_ReadFile(){
+void Exception_syscall_ReadFile()
+{
     OpenFile *id;
     int virAddr = machine->ReadRegister(4);
-    const int limit = 128;
-    int readBytes;
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result;
     char *buffer = NULL;
     SynchConsole ioCons;
 
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+   // tien hanh doc file
+    result = id->Read(buffer, 245);
+
+    machine->WriteRegister(2, result); 
 }
+
+void Exception_syscall_WriteFile()
+{
+    OpenFile *id;
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128;
+    int writeBytes, result;
+    char *buffer = NULL;
+    SynchConsole ioCons;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    PrintString("Nhap string ban muon write vao file: ");
+    ReadString(buffer);
+
+    result = id->Write(buffer, 245);
+
+    machine->WriteRegister(2, result); 
+}
+
 
 int System2User(int virtAddr,int len,char* buffer){
     if (len < 0) 
