@@ -26,7 +26,6 @@
 #include "syscall.h"
 
 #include "openfile.h"
-#include "synchcons.h"
 #include "synch.h"
 #include "filesys.h"
 #include "directory.h"
@@ -261,10 +260,9 @@ void Exception_sysCall_ReadNum(){
     int maxLength = 12; // max cua chuoi Ps: int --> -2147483648 -> +2147483647 --> chuoi co the co max la 12 char (tinh truong hop co '-' so am) Ps: chua vi tri cuoi cung cho '\0'
     char *numString = new char[Bytes]; // chuoi so ma nguoi dung nhap
     long long result = 0; // ket qua chuoi sau khi doi tu char -> int
-    SynchConsole ioCons;
     
     // user nhap so nguyen dang chuoi thong qua SynchConsoleIn
-    readBytes = ioCons.Read(numString, Bytes);
+    readBytes = ioSynCons->Read(numString, Bytes);
 
     // truong hop khong phai so am 
     if(numString[0] != '-'){
@@ -312,14 +310,12 @@ void Exception_sysCall_ReadNum(){
 
 // Quest 3.5 - ReadChar
 void Exception_sysCall_ReadChar(){
-    int i = 0;
     int readBytes;
     const int Bytes = 128;
     char *result = new char[Bytes];
-    SynchConsole ioCons;
     
     // nhap ky tu - lay so byte tu chuoi da nhap
-    readBytes = ioCons.Read(result, Bytes);
+    readBytes = ioSynCons->Read(result, Bytes);
     
     // readBytes == 1 --> nhap 1 ky tu
     if(readBytes == 1)
@@ -352,11 +348,10 @@ void Exception_sysCall_PrintNum(){
     int totalDigit = 0;
     int end = 0;
     char *numString = NULL;
-    SynchConsole ioCons;
 
     // Truong hop num la so 0
     if(num == 0){
-        ioCons.Write("0", 1); // print 0 
+        ioSynCons->Write("0", 1); // print 0 
         return;
     }
     else if(num < 0){ // kiem tra xem Num la so am hay duong
@@ -380,7 +375,7 @@ void Exception_sysCall_PrintNum(){
         num /= 10;
     }
 
-    ioCons.Write(numString, totalDigit);
+    ioSynCons->Write(numString, totalDigit);
 
     delete []numString;
     return;
@@ -389,10 +384,9 @@ void Exception_sysCall_PrintNum(){
 // Quest 3.6 - PrintChar
 void Exception_sysCall_PrintChar(){
     int charInNum = machine->ReadRegister(4);
-    SynchConsole ioCons;
     char result = (char)charInNum;
 
-    ioCons.Write(&result, 1);
+    ioSynCons->Write(&result, 1);
 
     return;
 }
@@ -403,11 +397,10 @@ void Exception_syscall_ReadString(){
     const int limit = 128;
     int readBytes;
     char *buffer = NULL;
-    SynchConsole ioCons;
     
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
-    readBytes = ioCons.Read(buffer, limit);
+    readBytes = ioSynCons->Read(buffer, limit);
     
     int i = 0;
     while (buffer[i] != '\0') {
@@ -424,14 +417,13 @@ void Exception_syscall_PrintString(){
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     int readBytes;
     char *buffer = NULL;
-    SynchConsole ioCons;
     
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
     
     // Xuat chuoi ra console = ham Write trong lop SynchConsole
     for(int i = 0; buffer[i] != '\0'; ++i)
-        ioCons.Write(&buffer[i], 1);
+        ioSynCons->Write(&buffer[i], 1);
     return;
 }
 
@@ -597,7 +589,6 @@ void Exception_syscall_ReadFile()
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     int readBytes, result;
     char *buffer = NULL;
-    SynchConsole ioCons;
 
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
