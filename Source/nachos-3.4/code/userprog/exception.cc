@@ -435,6 +435,13 @@ void Exception_syscall_Create(){
     bool createSuccess;
     char *fileName = getFileNameFromUser();
 
+    OpenFile* id = fileSystem->Open(fileName);
+
+    if (id == NULL) { 
+        result = -1;
+        DEBUG('a', "\nFile name is exists !!!\n");
+        return;
+    } 
     if(fileName == NULL || strlen(fileName) == 0){
         createSuccess = 0;
         
@@ -542,9 +549,10 @@ void Exception_syscall_OpenFile()
     // tien hanh mo file
     id = fileSystem->Open(fileName);
 
-    if (id == NULL) 
+    if (id == NULL) { 
         result = -1;
-    else 
+        DEBUG('a', "\nFile name not found\n");
+    } else 
         for (int i = 2; i < oft->_numOfFile; ++i)
             if (oft->table[i].File == NULL) {
                 result = i;
@@ -572,8 +580,9 @@ void Exception_syscall_CloseFile()
 
 void Exception_syscall_ReadFile()
 {
-    OpenFile *id;
     int virAddr = machine->ReadRegister(4);
+    int size = machine->ReadRegister(5);
+    int id = machine->ReadRegister(6);
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     int readBytes, result;
     char *buffer = NULL;
@@ -582,7 +591,9 @@ void Exception_syscall_ReadFile()
     buffer = User2System(virAddr, limit);
 
    // tien hanh doc file
-    result = id->Read(buffer, 245);
+    oft->table[id].File->Read(buffer, size);
+    for(int i = 0; buffer[i] != '\0'; ++i)
+        ioSynCons->Write(&buffer[i], 1);
 
     machine->WriteRegister(2, result); 
 }
