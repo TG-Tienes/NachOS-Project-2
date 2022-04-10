@@ -54,6 +54,14 @@ int System2User(int virtAddr,int len,char* buffer);
 // User to System
 char* User2System(int virtAddr,int limit);
 
+/*Ham Phu*/
+// Close File
+void closeFile(int id);
+
+// Get file name from User
+char *getFileNameFromUser();
+
+/*Project 1*/
 // Increase PC
 void increaseProgramCounter();
 
@@ -79,7 +87,7 @@ void Exception_syscall_PrintString();
 // Quest 3.7 - RandomNum
 void Exception_syscall_randIntNum();
 
-// Project 2
+/*Project 2*/
 void Exception_syscall_Remove();
 
 void Exception_syscall_Create();
@@ -409,7 +417,6 @@ void Exception_syscall_ReadString(){
 void Exception_syscall_PrintString(){
     int virAddr = machine->ReadRegister(4);
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
-    int readBytes;
     char *buffer = NULL;
     
     // lay buffer (chuoi) tu vung nho cua nguoi dung
@@ -422,23 +429,19 @@ void Exception_syscall_PrintString(){
 }
 
 // Project 2
-// create
+// system call create
 void Exception_syscall_Create(){
-    int virAddr = machine->ReadRegister(4), result;
-    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
-    char *buffer = NULL;
+    int result;
     bool createSuccess;
+    char *fileName = getFileNameFromUser();
 
-    // lay buffer (chuoi) tu vung nho cua nguoi dung
-    buffer = User2System(virAddr, limit);
-
-    if(buffer == NULL || strlen(buffer) == 0){
+    if(fileName == NULL || strlen(fileName) == 0){
         createSuccess = 0;
         
         DEBUG('a', "\n!!! File's name can't be NULL or empty !!!\n");
     }
     else
-        createSuccess = fileSystem->Create(buffer, 0); // Tao file rong (initial size = 0)
+        createSuccess = fileSystem->Create(fileName, 0); // Tao file rong (initial size = 0)
 
     if(createSuccess == 1){
         result = 0;
@@ -452,25 +455,21 @@ void Exception_syscall_Create(){
     }
     machine->WriteRegister(2, result);
     
-    delete []buffer;
+    delete []fileName;
     return;
 }
 
-// Remove
+// system call Remove
 void Exception_syscall_Remove(){
-    int virAddr = machine->ReadRegister(4), result;
-    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
-    char *buffer = NULL;
+    int result;
     bool removeSuccess;
-    
-    // lay buffer (chuoi) tu vung nho cua nguoi dung
-    buffer = User2System(virAddr, limit);
+    char *fileName = getFileNameFromUser();
 
     // Chuoi NULL hoac khong co gi --> xoa khong thanh cong
-    if(buffer == NULL || strlen(buffer) == 0)
+    if(fileName == NULL || strlen(fileName) == 0)
         removeSuccess = 0;
     else{
-        int index = oft->fileIndex(buffer);
+        int index = oft->fileIndex(fileName);
         
         // truong hop la stdin, stdout
         if(index == 0 || index == 1){ 
@@ -481,9 +480,9 @@ void Exception_syscall_Remove(){
             // close file
             DEBUG('a', "\nCLOSING FILE\n");
 
-            Close(index);
+            closeFile(index);
         }
-        removeSuccess = fileSystem->Remove(buffer); // goi ham remove trong fileSys
+        removeSuccess = fileSystem->Remove(fileName); // goi ham remove trong fileSys
     }
 
     // remove file thanh cong
@@ -499,7 +498,7 @@ void Exception_syscall_Remove(){
     }
     machine->WriteRegister(2, result);
     
-    delete []buffer;
+    delete []fileName;
     return;
 }
 
@@ -537,16 +536,11 @@ void Exception_syscall_Seek(){
 void Exception_syscall_OpenFile()
 {
     OpenFile *id;
-    int virAddr = machine->ReadRegister(4);
-    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
-    int readBytes, result = 10;
-    char *buffer = NULL;
+    int result = 10;
+    char *fileName = getFileNameFromUser();
 
-    // lay buffer (chuoi) tu vung nho cua nguoi dung
-    buffer = User2System(virAddr, limit);
-
-    // tien hanh doc file
-    id = fileSystem->Open(buffer);
+    // tien hanh mo file
+    id = fileSystem->Open(fileName);
 
     if (id == NULL) 
         result = -1;
@@ -555,7 +549,7 @@ void Exception_syscall_OpenFile()
             if (oft->table[i].File == NULL) {
                 result = i;
                 oft->table[i].File = id;
-                oft->table[i].fileName = buffer;
+                oft->table[i].fileName = fileName;
                 break;
             }
 
@@ -566,13 +560,14 @@ void Exception_syscall_OpenFile()
 //close file function
 void Exception_syscall_CloseFile()
 {
-
     int virAddr = machine->ReadRegister(4);
     int id = machine->ReadRegister(5);
 
     // tien hanh dong file
-    Close(id);
+    closeFile(id);
+
     machine->WriteRegister(2, id);
+    return;
 }
 
 void Exception_syscall_ReadFile()
@@ -591,7 +586,6 @@ void Exception_syscall_ReadFile()
 
     machine->WriteRegister(2, result); 
 }
-
 
 int System2User(int virtAddr,int len,char* buffer){
     if (len < 0) 
@@ -636,4 +630,20 @@ char* User2System(int virtAddr,int limit){
     return kernelBuf;
 }
 
+void closeFile(int id){
+    Close(id);
+    delete oft->table[id].File;
+    oft->table[id].File = NULL;
+}
+
+char *getFileNameFromUser(){
+    int virAddr = machine->ReadRegister(4);
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    char *buffer = NULL;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+
+    return buffer;
+}
 

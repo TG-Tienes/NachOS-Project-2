@@ -25,8 +25,12 @@ bool OpenFileTable::isOpen(int id){
 
 // Kiem tra input fileName co thuoc table hay khong(ten file cua cac file trong table)
 int OpenFileTable::fileIndex(char *name){
-    for(int i = 0; i < _numOfFile; ++i)
-        if(table[i].fileName == name)
+    for(int i = 0; i < _numOfFile; ++i){
+        if(table[i].File == NULL)
+            continue;
+        if(strcmp(table[i].fileName, name) == 0)
             return i;
+    }
+        
     return -1;
 }
