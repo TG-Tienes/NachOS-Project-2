@@ -509,7 +509,7 @@ void Exception_syscall_Seek(){
     int id = machine->ReadRegister(5);
 
     length = oft->table[id].File->Length();
-    if(id < 0 || id >= MAX_NUM_OF_FILE){
+    if(id < 0 || id >= oft->_numOfFile){
         DEBUG('a', "OpenFileID exceeded file limit");
     }
     else if(id == 0 || id == 1){
@@ -537,7 +537,6 @@ void Exception_syscall_Seek(){
 void Exception_syscall_OpenFile()
 {
     OpenFile *id;
-
     int virAddr = machine->ReadRegister(4);
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     int readBytes, result = 10;
@@ -552,7 +551,7 @@ void Exception_syscall_OpenFile()
     if (id == NULL) 
         result = -1;
     else 
-        for (int i = 2; i < MAX_NUM_OF_FILE; ++i)
+        for (int i = 2; i < oft->_numOfFile; ++i)
             if (oft->table[i].File == NULL) {
                 result = i;
                 oft->table[i].File = id;
