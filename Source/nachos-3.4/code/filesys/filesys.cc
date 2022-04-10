@@ -338,12 +338,4 @@ FileSystem::Print()
     delete dirHdr;
     delete freeMap;
     delete directory;
-} 
-
-// int FileSystem::getSector(char *fileName){
-//     Directory *dir = new Directory(NumDirEntries);
-//     int res = dir->Find(fileName);
-
-//     delete dir;
-//     return res;
-// }
+}

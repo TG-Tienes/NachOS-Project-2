@@ -40,10 +40,6 @@
 #include "directory.h"
 #include "copyright.h"
 
-#include "disk.h"
-#include "bitmap.h"
-#include "filehdr.h"
-
 #define MAX_NUM_OF_FILE 10
 
 #define MAX_NUM_OF_FILE 10
@@ -105,35 +101,4 @@ class FileSystem {
 
 
 #endif // FILESYS
-
-struct FileInfor 
-{
-	OpenFile* File;
-	char* fileName;
-};
-
-class OpenFileTable{
-public:
-	FileInfor *table;
-public:
-
-	OpenFileTable(){
-		table = new FileInfor[MAX_NUM_OF_FILE];
-		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-			table[i].File = NULL;
-	}
-	bool isOpen(int id){
-		if(table[id].File == NULL)
-			return 0;
-		return 1;
-	}
-
-	int fileIndex(char *name){
-		for(int i = 0; i < MAX_NUM_OF_FILE; ++i)
-			if(table[i].fileName == name)
-				return i;
-		return -1;
-	}
-};
-
 #endif // FS_H

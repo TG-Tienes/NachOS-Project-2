@@ -30,10 +30,12 @@ extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
 #ifdef USER_PROGRAM
-#include "synchcons.h"
 #include "machine.h"
+#include "synchcons.h"
+#include "OpenFileTable.h"
 extern Machine* machine;	// user program memory and registers
 extern SynchConsole *ioSynCons;
+extern OpenFileTable *oft;
 #endif
 
 #ifdef FILESYS_NEEDED 		// FILESYS or FILESYS_STUB 

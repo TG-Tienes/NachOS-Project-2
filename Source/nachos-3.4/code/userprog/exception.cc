@@ -25,12 +25,6 @@
 #include "system.h"
 #include "syscall.h"
 
-#include "openfile.h"
-#include "synch.h"
-#include "filesys.h"
-#include "directory.h"
-
-OpenFileTable oft;
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -476,7 +470,7 @@ void Exception_syscall_Remove(){
     if(buffer == NULL || strlen(buffer) == 0)
         removeSuccess = 0;
     else{
-        int index = oft.fileIndex(buffer);
+        int index = oft->fileIndex(buffer);
         
         // truong hop la stdin, stdout
         if(index == 0 || index == 1){ 
@@ -514,14 +508,14 @@ void Exception_syscall_Seek(){
     int pos = machine->ReadRegister(4), result = -1, length = 0;
     int id = machine->ReadRegister(5);
 
-    length = oft.table[id].File->Length();
+    length = oft->table[id].File->Length();
     if(id < 0 || id >= MAX_NUM_OF_FILE){
         DEBUG('a', "OpenFileID exceeded file limit");
     }
     else if(id == 0 || id == 1){
         DEBUG('a', "\nCan't Seek stdin and stdout\n");
     }
-    else if(oft.isOpen(id) != 1){
+    else if(oft->isOpen(id) != 1){
         DEBUG('a', "\nFile is not opened\n");
     }
     else if(pos < -1 || pos > length){
@@ -530,7 +524,7 @@ void Exception_syscall_Seek(){
     else{
         if(pos == -1)
             pos = length;
-        oft.table[id].File->Seek(pos);
+        oft->table[id].File->Seek(pos);
         result = pos;
     }
 
@@ -559,14 +553,15 @@ void Exception_syscall_OpenFile()
         result = -1;
     else 
         for (int i = 2; i < MAX_NUM_OF_FILE; ++i)
-            if (oft.table[i].File == NULL) {
+            if (oft->table[i].File == NULL) {
                 result = i;
-                oft.table[i].File = id;
-                oft.table[i].fileName = buffer;
+                oft->table[i].File = id;
+                oft->table[i].fileName = buffer;
                 break;
             }
 
     machine->WriteRegister(2, result);
+    return;
 }
 
 //close file function
@@ -575,7 +570,6 @@ void Exception_syscall_CloseFile()
 
     int virAddr = machine->ReadRegister(4);
     int id = machine->ReadRegister(5);
-    int result = 1;
 
     // tien hanh dong file
     Close(id);

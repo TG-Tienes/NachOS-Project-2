@@ -30,6 +30,7 @@ SynchDisk   *synchDisk;
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
 SynchConsole *ioSynCons;
+OpenFileTable *oft;
 #endif
 
 #ifdef NETWORK
@@ -83,6 +84,7 @@ Initialize(int argc, char **argv)
 
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program
+    int maxNumOfFile = 10;
 #endif
 #ifdef FILESYS_NEEDED
     bool format = FALSE;	// format disk
@@ -150,6 +152,7 @@ Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg);	// this must come first
     ioSynCons = new SynchConsole;
+    oft = new OpenFileTable(maxNumOfFile);
 #endif
 
 #ifdef FILESYS
@@ -181,6 +184,7 @@ Cleanup()
 #ifdef USER_PROGRAM
     delete machine;
     delete ioSynCons;
+    delete oft;
 #endif
 
 #ifdef FILESYS_NEEDED
