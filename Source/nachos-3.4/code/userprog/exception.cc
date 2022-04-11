@@ -481,15 +481,16 @@ void Exception_syscall_Remove(){
         // truong hop la stdin, stdout
         if(index == 0 || index == 1){ 
             DEBUG('a', "\n!!! Can't remove stdin and stdout !!!\n");
-            return;
+            removeSuccess = 0;
         }
-        else if(index > 1){
+        else{ // Tien hanh remove file
             // close file
-            DEBUG('a', "\nCLOSING FILE\n");
-
-            closeFile(index);
+            if(index > 1){
+                DEBUG('a', "\nCLOSING FILE\n");
+                closeFile(index);
+            }
+            removeSuccess = fileSystem->Remove(fileName); // goi ham remove trong fileSys
         }
-        removeSuccess = fileSystem->Remove(fileName); // goi ham remove trong fileSys
     }
 
     // remove file thanh cong
@@ -511,8 +512,8 @@ void Exception_syscall_Remove(){
 
 // Seek
 void Exception_syscall_Seek(){
-    int pos = machine->ReadRegister(4), result = -1, length = 0;
-    int id = machine->ReadRegister(5);
+    int pos = machine->ReadRegister(4), result = -1, length = 0,
+        id = machine->ReadRegister(5);
 
     length = oft->table[id].File->Length();
     if(id < 0 || id >= oft->_numOfFile){
@@ -521,7 +522,7 @@ void Exception_syscall_Seek(){
     else if(id == 0 || id == 1){
         DEBUG('a', "\nCan't Seek stdin and stdout\n");
     }
-    else if(oft->isOpen(id) != 1){
+    else if(oft->isOpen(id) == 0){
         DEBUG('a', "\nFile is not opened\n");
     }
     else if(pos < -1 || pos > length){
@@ -535,7 +536,6 @@ void Exception_syscall_Seek(){
     }
 
     machine->WriteRegister(2, result);
-
     return;
 }
 
@@ -543,7 +543,7 @@ void Exception_syscall_Seek(){
 void Exception_syscall_OpenFile()
 {
     OpenFile *id;
-    int result = 10;
+    int result;
     char *fileName = getFileNameFromUser();
 
     // tien hanh mo file
@@ -568,53 +568,88 @@ void Exception_syscall_OpenFile()
 //close file function
 void Exception_syscall_CloseFile()
 {
-    int virAddr = machine->ReadRegister(4);
-    int id = machine->ReadRegister(6);
+    int id = machine->ReadRegister(4);
+
     // tien hanh dong file
     closeFile(id);
 
-    machine->WriteRegister(2, id);
     return;
 }
 
 void Exception_syscall_ReadFile()
 {
-    int virAddr = machine->ReadRegister(4);
-    int size = machine->ReadRegister(5);
-    int id = machine->ReadRegister(6);
-    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
-    int readBytes, result;
+    int virAddr = machine->ReadRegister(4),
+        size = machine->ReadRegister(5),
+        id = machine->ReadRegister(6), readBytes;
     char *buffer = NULL;
 
-    // lay buffer (chuoi) tu vung nho cua nguoi dung
-    buffer = User2System(virAddr, limit);
+    if(size < -1){ // input size am
+        DEBUG('a', "\nInvalid Size\n");
+        readBytes = -1;
+    }
+    else if(id == 0 || id == 1){ // Xet TH la stdin, stdout
+        DEBUG('a', "\nCan't Read stdin and stdout");
+        readBytes = -1;
+    }
+    else if(id < 0 || id > oft->_numOfFile){ // id vuot qua limit cua openfiletable
+        DEBUG('a', "\ninput ID exceeded the limit number of openfile of openfiletable\n");
+        readBytes = -1;
+    }
+    else if (oft->isOpen(id) == 0) {
+        DEBUG('a', "\nFile is not Opened\n");
+        readBytes = -1;
+    }
+    else{
+        int acctualFileSize = oft->table[id].File->Length(); // File Size
 
-   // tien hanh doc file
-    oft->table[id].File->Read(buffer, size);
-    for(int i = 0; buffer[i] != '\0'; ++i)
-        ioSynCons->Write(&buffer[i], 1);
+        //size = -1 || size > acctualFileSize -> Doc het nguyen file
+        if(size == -1 || size > acctualFileSize)
+            size = acctualFileSize;
 
-    machine->WriteRegister(2, result); 
+        // allocate
+        buffer = new char[size];
+
+        // tien hanh doc file
+        readBytes = oft->table[id].File->Read(buffer, size);
+
+        // tra ve user
+        System2User(virAddr, size, buffer);
+        delete []buffer;
+    }
+    machine->WriteRegister(2, readBytes);
+
+    return;
 }
 
 void Exception_syscall_WriteFile()
 {
-    int virAddr = machine->ReadRegister(4);
-    int size = machine->ReadRegister(5);
-    int id = machine->ReadRegister(6);
+    int virAddr = machine->ReadRegister(4),
+        size = machine->ReadRegister(5),
+        id = machine->ReadRegister(6);
+
+    if(id == 1 || id == 0){ // stdin, stdout
+        DEBUG('a', "\nCan't write into stdin, stdout\n");
+        return;
+    }
+    else if(id < 0 || id > oft->_numOfFile){
+        DEBUG('a', "\ninput ID exceeded the limit number of openfile of openfiletable\n");
+        return;
+    }
+    else if(oft->isOpen(id) == 0){
+        DEBUG('a', "\nThis ID wasn't assigned to any open File\n");
+        return;
+    }
 
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
-    int readBytes, result = 1;
     char *buffer = NULL;
-    char *buffer2 = NULL;
 
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
     
     //tien hanh ghi file
-    result = oft->table[id].File->Write(buffer, size);
+    oft->table[id].File->Write(buffer, size);
 
-    machine->WriteRegister(2, result); 
+    return;
 }
 
 int System2User(int virtAddr,int len,char* buffer){
@@ -661,9 +696,12 @@ char* User2System(int virtAddr,int limit){
 }
 
 void closeFile(int id){
-    Close(id);
-    delete oft->table[id].File;
+    if(id == 2 || id <= 0 || id >= oft->_numOfFile)
+        return;
+
+    delete []oft->table[id].File;
     oft->table[id].File = NULL;
+    return;
 }
 
 char *getFileNameFromUser(){

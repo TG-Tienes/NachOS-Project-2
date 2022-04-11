@@ -1,7 +1,5 @@
 #include "openfile.h"
 
-#define MAX_NUM_OF_FILE 10
-
 struct FileInfor 
 {
 	OpenFile* File;
