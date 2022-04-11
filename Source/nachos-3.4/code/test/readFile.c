@@ -6,7 +6,7 @@ int main()
     int createFile = 1;
     int id;
 
-    PrintString("Enter file name to read: ");
+    PrintString("Enter file name to open & read: ");
     ReadString(fileName);
     id = Open(fileName);
     if ( id == -1) {
