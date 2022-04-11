@@ -101,6 +101,7 @@ void Exception_syscall_ReadFile();
 
 void Exception_syscall_CloseFile();
 
+void Exception_syscall_WriteFile();
 /* EXCEPTION HANDLER */
 void
 ExceptionHandler(ExceptionType which)
@@ -191,9 +192,15 @@ ExceptionHandler(ExceptionType which)
                     increaseProgramCounter();
                     break;
                 }
+                case SC_Write:{
+                    Exception_syscall_WriteFile();
+                    increaseProgramCounter();
+                    break;
+                }
             }
             break;
         }
+        
         // runtime-error exceptions (quest 3.1)
         case PageFaultException:{
             printf("User exception: Page Fault Exception\n");
@@ -542,9 +549,10 @@ void Exception_syscall_OpenFile()
     // tien hanh mo file
     id = fileSystem->Open(fileName);
 
-    if (id == NULL) 
+    if (id == NULL) { 
         result = -1;
-    else 
+        DEBUG('a', "\nFile name not found\n");
+    } else 
         for (int i = 2; i < oft->_numOfFile; ++i)
             if (oft->table[i].File == NULL) {
                 result = i;
@@ -561,8 +569,7 @@ void Exception_syscall_OpenFile()
 void Exception_syscall_CloseFile()
 {
     int virAddr = machine->ReadRegister(4);
-    int id = machine->ReadRegister(5);
-
+    int id = machine->ReadRegister(6);
     // tien hanh dong file
     closeFile(id);
 
@@ -572,8 +579,9 @@ void Exception_syscall_CloseFile()
 
 void Exception_syscall_ReadFile()
 {
-    OpenFile *id;
     int virAddr = machine->ReadRegister(4);
+    int size = machine->ReadRegister(5);
+    int id = machine->ReadRegister(6);
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     int readBytes, result;
     char *buffer = NULL;
@@ -582,7 +590,29 @@ void Exception_syscall_ReadFile()
     buffer = User2System(virAddr, limit);
 
    // tien hanh doc file
-    result = id->Read(buffer, 245);
+    oft->table[id].File->Read(buffer, size);
+    for(int i = 0; buffer[i] != '\0'; ++i)
+        ioSynCons->Write(&buffer[i], 1);
+
+    machine->WriteRegister(2, result); 
+}
+
+void Exception_syscall_WriteFile()
+{
+    int virAddr = machine->ReadRegister(4);
+    int size = machine->ReadRegister(5);
+    int id = machine->ReadRegister(6);
+
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result = 1;
+    char *buffer = NULL;
+    char *buffer2 = NULL;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+    
+    //tien hanh ghi file
+    result = oft->table[id].File->Write(buffer, size);
 
     machine->WriteRegister(2, result); 
 }
