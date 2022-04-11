@@ -586,8 +586,11 @@ void Exception_syscall_ReadFile()
     int readBytes, result;
     char *buffer = NULL;
 
-    // lay buffer (chuoi) tu vung nho cua nguoi dung
-    buffer = User2System(virAddr, limit);
+    if ( oft->table[i].File == NULL) {
+        DEBUG('a', "\nNo id file exists\n");
+        result = -1;
+        return;
+    }
 
    // tien hanh doc file
     oft->table[id].File->Read(buffer, size);
@@ -602,12 +605,16 @@ void Exception_syscall_WriteFile()
     int virAddr = machine->ReadRegister(4);
     int size = machine->ReadRegister(5);
     int id = machine->ReadRegister(6);
-
+ 
     const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
     int readBytes, result = 1;
     char *buffer = NULL;
-    char *buffer2 = NULL;
-
+    
+    if ( oft->table[i].File == NULL) {
+        DEBUG('a', "\nNo id file exists\n");
+        result = -1;
+        return;
+    }
     // lay buffer (chuoi) tu vung nho cua nguoi dung
     buffer = User2System(virAddr, limit);
     
