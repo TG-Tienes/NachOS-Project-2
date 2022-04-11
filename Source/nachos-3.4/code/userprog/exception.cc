@@ -101,6 +101,7 @@ void Exception_syscall_ReadFile();
 
 void Exception_syscall_CloseFile();
 
+void Exception_syscall_WriteFile();
 /* EXCEPTION HANDLER */
 void
 ExceptionHandler(ExceptionType which)
@@ -191,9 +192,15 @@ ExceptionHandler(ExceptionType which)
                     increaseProgramCounter();
                     break;
                 }
+                case SC_Write:{
+                    Exception_syscall_WriteFile();
+                    increaseProgramCounter();
+                    break;
+                }
             }
             break;
         }
+        
         // runtime-error exceptions (quest 3.1)
         case PageFaultException:{
             printf("User exception: Page Fault Exception\n");
@@ -435,13 +442,6 @@ void Exception_syscall_Create(){
     bool createSuccess;
     char *fileName = getFileNameFromUser();
 
-    OpenFile* id = fileSystem->Open(fileName);
-
-    if (id == NULL) { 
-        result = -1;
-        DEBUG('a', "\nFile name is exists !!!\n");
-        return;
-    } 
     if(fileName == NULL || strlen(fileName) == 0){
         createSuccess = 0;
         
@@ -569,8 +569,7 @@ void Exception_syscall_OpenFile()
 void Exception_syscall_CloseFile()
 {
     int virAddr = machine->ReadRegister(4);
-    int id = machine->ReadRegister(5);
-
+    int id = machine->ReadRegister(6);
     // tien hanh dong file
     closeFile(id);
 
@@ -594,6 +593,26 @@ void Exception_syscall_ReadFile()
     oft->table[id].File->Read(buffer, size);
     for(int i = 0; buffer[i] != '\0'; ++i)
         ioSynCons->Write(&buffer[i], 1);
+
+    machine->WriteRegister(2, result); 
+}
+
+void Exception_syscall_WriteFile()
+{
+    int virAddr = machine->ReadRegister(4);
+    int size = machine->ReadRegister(5);
+    int id = machine->ReadRegister(6);
+
+    const int limit = 128; // gioi han bytes se lay tu vung nho (co the chinh thanh so khac)
+    int readBytes, result = 1;
+    char *buffer = NULL;
+    char *buffer2 = NULL;
+
+    // lay buffer (chuoi) tu vung nho cua nguoi dung
+    buffer = User2System(virAddr, limit);
+    
+    //tien hanh ghi file
+    result = oft->table[id].File->Write(buffer, size);
 
     machine->WriteRegister(2, result); 
 }
