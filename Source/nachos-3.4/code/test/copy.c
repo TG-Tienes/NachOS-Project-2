@@ -31,6 +31,8 @@ int main()
 	    PrintString("\nCopy susscessful\n");
     }
 
+    Close(id1);
+    //Close(id2);
     Halt();
 
 }
