@@ -2,7 +2,8 @@
 
 int main()
 {
-    int id;
+    int id, size;
+    int count = 0;
     char* fileName, *inf;
     PrintString("\nPlease enter your file name: ");
     ReadString(fileName);
@@ -11,8 +12,12 @@ int main()
         PrintString("\n!!! ERROR !!! Can not find this file\n\n");
         PrintString(fileName);
     } else {
-        Read(inf, -1, id );
-        PrintString(inf);
+        size = FileSize(id);
+        while ( count <= size) {
+            Read(inf, 64, id );
+            PrintString(inf);
+            count += 64;
+        }
     }
     Halt();
 }
