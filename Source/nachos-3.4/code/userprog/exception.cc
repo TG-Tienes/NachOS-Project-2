@@ -525,11 +525,11 @@ void Exception_syscall_Seek(){
     else if(oft->isOpen(id) == 0){
         DEBUG('a', "\nFile is not opened\n");
     }
-    else if(pos < -1 || pos > length){
-        DEBUG('a', "\nSeek position exceeded the limit of this file\n");
+    else if(pos < -1){
+        DEBUG('a', "\nInvalid Position\n");
     }
     else{
-        if(pos == -1)
+        if(pos == -1 || pos > length)
             pos = length;
         oft->table[id].File->Seek(pos);
         result = pos;
@@ -542,24 +542,30 @@ void Exception_syscall_Seek(){
 // open file function
 void Exception_syscall_OpenFile()
 {
-    OpenFile *id;
+    OpenFile *file;
     int result;
     char *fileName = getFileNameFromUser();
 
-    // tien hanh mo file
-    id = fileSystem->Open(fileName);
-
-    if (id == NULL) { 
+    if(fileName == NULL || strlen(fileName) == 0){
         result = -1;
-        DEBUG('a', "\nFile name not found\n");
-    } else 
-        for (int i = 2; i < oft->_numOfFile; ++i)
-            if (oft->table[i].File == NULL) {
-                result = i;
-                oft->table[i].File = id;
-                oft->table[i].fileName = fileName;
-                break;
-            }
+    }
+    else{
+        // tien hanh mo file
+        file = fileSystem->Open(fileName);
+
+        if (file == NULL) { 
+            result = -1;
+            DEBUG('a', "\nFile name not found\n");
+        } 
+        else 
+            for (int i = 2; i < oft->_numOfFile; ++i)
+                if (oft->table[i].File == NULL) {
+                    result = i;
+                    oft->table[i].File = file;
+                    oft->table[i].fileName = fileName;
+                    break;
+                }
+    }
 
     machine->WriteRegister(2, result);
     return;
@@ -578,9 +584,9 @@ void Exception_syscall_CloseFile()
 
 void Exception_syscall_ReadFile()
 {
-    int virAddr = machine->ReadRegister(4),
-        size = machine->ReadRegister(5),
-        id = machine->ReadRegister(6), readBytes;
+    int virAddr = machine->ReadRegister(4);
+    int size = machine->ReadRegister(5);
+    int id = machine->ReadRegister(6), readBytes;
     char *buffer = NULL;
 
     if(size < -1){ // input size am
@@ -604,10 +610,10 @@ void Exception_syscall_ReadFile()
 
         //size = -1 || size > acctualFileSize -> Doc het nguyen file
         if(size == -1 || size > acctualFileSize)
-            size = acctualFileSize;
-
+            size =  acctualFileSize;
+        
         // allocate
-        buffer = new char[size];
+        buffer = User2System(virAddr, size);
 
         // tien hanh doc file
         readBytes = oft->table[id].File->Read(buffer, size);
@@ -699,7 +705,7 @@ void closeFile(int id){
     if(id == 2 || id <= 0 || id >= oft->_numOfFile)
         return;
 
-    delete []oft->table[id].File;
+    delete oft->table[id].File;
     oft->table[id].File = NULL;
     return;
 }
