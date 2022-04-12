@@ -41,6 +41,7 @@
 #define SC_ReadString 19
 #define SC_PrintString 20
 #define SC_RanNum 21
+#define SC_FileSize 22
 
 #ifndef IN_ASM
 
@@ -147,7 +148,7 @@ void Close(OpenFileId id);
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 
  */
-
+int FileSize(OpenFileId id);
 /* Fork a thread to run a procedure ("func") in the *same* address space 
  * as the current thread.
  */

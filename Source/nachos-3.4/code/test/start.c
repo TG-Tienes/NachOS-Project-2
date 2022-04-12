@@ -51,6 +51,15 @@ Remove:
 	j $31
 	.end Remove
 
+/* getFileSize */
+	.globl FileSize
+	.ent FileSize
+FileSize:
+	addiu $2,$0,SC_FileSize
+	syscall
+	j $31
+	.end FileSize
+
 /* Seek */
 	.globl Seek
 	.ent Seek
