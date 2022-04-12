@@ -102,6 +102,8 @@ void Exception_syscall_ReadFile();
 void Exception_syscall_CloseFile();
 
 void Exception_syscall_WriteFile();
+
+void Exception_syscall_GetFileFile();
 /* EXCEPTION HANDLER */
 void
 ExceptionHandler(ExceptionType which)
@@ -194,6 +196,11 @@ ExceptionHandler(ExceptionType which)
                 }
                 case SC_Write:{
                     Exception_syscall_WriteFile();
+                    increaseProgramCounter();
+                    break;
+                }
+                case SC_FileSize:{
+                    Exception_syscall_GetFileFile();
                     increaseProgramCounter();
                     break;
                 }
@@ -576,6 +583,16 @@ void Exception_syscall_CloseFile()
     return;
 }
 
+void Exception_syscall_GetFileFile()
+{
+    int id = machine->ReadRegister(4);
+    int result;
+    // tien hanh dong file
+    result = oft->table[id].File->Length();
+
+    machine->WriteRegister(2, result);
+    return;
+}
 void Exception_syscall_ReadFile()
 {
     int virAddr = machine->ReadRegister(4),
