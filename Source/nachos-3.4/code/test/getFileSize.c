@@ -12,7 +12,7 @@ int main()
         PrintString(fileName);
     } else {
         size = FileSize(id);
-        PrintNumber(size);
+        PrintNum(size);
     }
     Halt();
 }
