@@ -19,5 +19,7 @@ int main()
             count += 64;
         }
     }
+    
+    Close(id);
     Halt();
 }
