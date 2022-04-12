@@ -5,7 +5,7 @@ int main()
     char *fileName;
     int id;
 
-    PrintString("Enter file name to open: ");
+    PrintString("Enter file name to remove: ");
     ReadString(fileName);
     
     Remove(fileName);
