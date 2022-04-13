@@ -8,7 +8,7 @@ int main()
 
     int id1, id2, size1, size2;
     float percent;
-    int count = 0;
+    int count = 0, i;
     char* fileName1, *fileName2, *inf;
 
     PrintString("\nPlease enter your origin file name: ");
@@ -24,15 +24,16 @@ int main()
         PrintString("\n!!! ERROR !!! Can not find this file\n\n");
     } else {
         while ( count <= size1) {
-            Read(inf, 64, id1);
-            Write(inf, 64, id2);
-	        count += 64;
+            i = Read(inf, 64, id1);
+            Write(inf, i, id2);
+	        count += i;
         }
 	    PrintString("\nCopy susscessful\n");
+	Close(id1);
+    	Close(id2);
     }
 
-    Close(id1);
-    //Close(id2);
+   
     Halt();
 
 }
