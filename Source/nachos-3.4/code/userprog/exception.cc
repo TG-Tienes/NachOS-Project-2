@@ -623,11 +623,11 @@ void Exception_syscall_ReadFile()
         readBytes = -1;
     }
     else{
-        int acctualFileSize = oft->table[id].File->Length(); // File Size
+        int actualFileSize = oft->table[id].File->Length(); // File Size
 
         //size = -1 || size > acctualFileSize -> Doc het nguyen file
-        if(size == -1 || size > acctualFileSize)
-            size =  acctualFileSize;
+        if(size == -1 || size > actualFileSize)
+            size =  actualFileSize;
         
         // allocate
         buffer = User2System(virAddr, size);
